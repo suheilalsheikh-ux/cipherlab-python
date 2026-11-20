@@ -1,0 +1,12 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>فحص محرك Python — مختبر الشفرات</title><style>body{margin:0;padding:28px 16px;font:16px/1.8 Tahoma,Arial,sans-serif;background:#081422;color:#e6f1ff}main{max-width:720px;margin:auto}h1{font-size:1.45rem}button{background:#36d3aa;border:0;border-radius:9px;padding:12px 18px;font-weight:700;cursor:pointer;color:#081422}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0d263a;border:1px solid #325b70;padding:18px;border-radius:12px;min-height:130px;direction:ltr;text-align:left}.muted{color:#a5bece}a{color:#5feac7}</style></head><body><main><h1>🧪 فحص تشغيل Python 3.14</h1><p>هذا الاختبار منفصل عن الواجهة التعليمية ويفحص عامل Python الحقيقي.</p><button id="run">تشغيل الاختبار</button><pre id="log">اضغط الزر لبدء الفحص.</pre><p class="muted">إذا فشل الاختبار انسخ الرسالة كاملة؛ ستوضح هل المشكلة في تنزيل المكتبة أم تهيئة Python أم تنفيذ الكود.</p><p><a href="./">العودة إلى مختبر الشفرات</a></p></main><script>
+let worker;
+const log=document.getElementById('log'),btn=document.getElementById('run');
+function add(t){log.textContent+='\n'+t}
+btn.onclick=()=>{btn.disabled=true;log.textContent='1) فتح عامل التشغيل…'; if(worker)worker.terminate();
+ try{worker=new Worker('./python-worker.js?v=engine-314-2',{type:'module'});}catch(e){add('فشل Worker: '+e);btn.disabled=false;return}
+ const timer=setTimeout(()=>{add('انتهت مهلة الفحص 90 ثانية');btn.disabled=false;worker.terminate()},90000);
+ worker.onerror=e=>{clearTimeout(timer);add('خطأ داخل Worker: '+(e.message||'غير معروف')+' / '+(e.filename||'')+':'+(e.lineno||''));btn.disabled=false;};
+ worker.onmessage=e=>{let m=e.data||{};if(m.kind==='progress')add(m.text);else if(m.kind==='ready')add('2) محرك Python جاهز ✓');else if(m.kind==='done'){clearTimeout(timer);add('3) استجابة Python: '+JSON.stringify(m.result,null,2));add(m.result?.stdout?.trim()==='5'?'✅ نجاح كامل: Python نفذ print(2+3)':'⚠️ المحرّك ردّ، لكن المخرجات غير متوقعة');btn.disabled=false}else if(m.kind==='error'){clearTimeout(timer);add('❌ '+m.error);btn.disabled=false}};
+ worker.postMessage({id:1,command:'run',source:'print(2 + 3)',tests:[],payload:{}});
+};
+</script></body></html>

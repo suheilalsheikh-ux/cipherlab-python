@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#091321" />
+<meta name="cipherlab-engine" content="Pyodide 314.0.8 module-worker rev2" />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <meta name="description" content="تعلم أساسيات بايثون عبر 22 درسًا تفاعليًا وتمارين تحقق ثم شغّل كود Caesar وVigenère وشاهد التتبع الفعلي." />
 <title>مختبر الشفرات | تعلّم Python من الصفر وتطبيق Caesar وVigenère</title>
@@ -33,13 +34,19 @@
 .runtime-guide.error{border-color:#bf6170;background:#34232e;color:#ffd1d8}
 .runtime-guide .btn{padding:6px 10px;font-size:.75rem}
 
+
+/* Mobile layout hardening: contain editors, terminals and code sections */
+html,body{max-width:100%;overflow-x:clip}
+.container,.course-panel,.course-layout,.lesson-body,.cipher-coding-layout,.cipher-code-main,.cipher-code-side,.course-head{min-width:0;max-width:100%}
+.python-editor,.terminal,.code-line-view,.trace-panel{min-width:0;max-width:100%}
+@media(max-width:750px){.course-stamp{pointer-events:none;opacity:.55}.lesson-body{padding:14px}.course-head{padding:14px}}
 </style>
 </head>
 <body>
 <div class="course-stamp" aria-label="تصميم المهندس سهيل الشيخ">تصميم <b>المهندس سهيل الشيخ</b></div>
 <header>
   <div class="container topbar">
-    <a href="#home" class="brand" aria-label="العودة لأعلى الصفحة"><span class="brand-icon">{ }</span><span>مختبر الشفرات<small>CIPHER LAB · INTERACTIVE</small></span></a>
+    <a href="#home" class="brand" aria-label="العودة لأعلى الصفحة"><span class="brand-icon">{ }</span><span>مختبر الشفرات<small>CIPHER LAB · INTERACTIVE · v2</small></span></a>
     <nav class="nav" aria-label="أقسام الدرس"><a href="#python-course">أكاديمية Python</a><a href="#python-code-lab">مختبر الأكواد</a><a href="#basics">مقدمة التشفير</a><a href="#caesar">Caesar</a><a href="#vigenere">Vigenère</a><a href="#compare">المقارنة</a><a href="#quiz">اختبر نفسك</a></nav>
     <div class="utility"><button type="button" class="btn btn-ghost btn-small" onclick="window.print()">⎙ طباعة الملخص</button></div>
   </div>
@@ -83,7 +90,7 @@
     <div class="editor-top"><span class="editor-title" id="lessonEditLabel">example.py · مثال الدرس</span><span class="editor-dots" aria-hidden="true">● ● ●</span></div>
     <textarea id="lessonCode" class="python-editor" dir="ltr" spellcheck="false" aria-label="محرر كود Python للدرس" autocapitalize="off" autocomplete="off"></textarea>
     <div class="course-actions"><button class="btn btn-primary" id="lessonRun" type="button">▶ شغّل الكود</button><button class="btn btn-secondary" id="lessonCheck" type="button">✅ تحقّق من الحل</button><span class="run-status" id="courseStatus" role="status">جاهز للتجربة</span></div>
-    <div class="runtime-guide" id="runtimeGuide" role="status" aria-live="polite"><span id="runtimeGuideText">⏳ يتم تجهيز محرّك Python تلقائيًا أثناء قراءتك للدرس…</span><button class="btn btn-secondary btn-small" id="pythonRetry" type="button" style="display:none">↻ إعادة محاولة الاتصال</button></div>
+    <div class="runtime-guide" id="runtimeGuide" role="status" aria-live="polite"><span id="runtimeGuideText">⏳ محرّك Python الجديد 3.14 يجري تجهيزه…</span><button class="btn btn-secondary btn-small" id="pythonRetry" type="button" style="display:none">↻ إعادة محاولة الاتصال</button></div>
     <div class="caption">المخرجات الفعلية من Python</div><pre class="terminal" id="lessonOutput" aria-live="polite">شغّل المثال لرؤية النتيجة.</pre>
     <div class="caption">الناتج المتوقع من المثال</div><div class="expected-output" id="lessonExpected"></div>
     <div class="task-card"><h4>🎯 تحدي البرمجة</h4><p id="lessonTask"></p><span class="course-chip" id="lessonTestsCount">اختبارات آلية</span><div id="lessonTestResults" class="test-results" aria-live="polite"></div></div>
@@ -286,7 +293,7 @@ function getWorker(){
  let worker;
  try{
   if(!['http:','https:'].includes(location.protocol)) throw new Error('لا يمكن تشغيل Python الحقيقي عند فتح HTML كملف محلي (content:// أو file://). افتح النسخة المنشورة عبر HTTPS.');
-  worker=new Worker(new URL('python-worker.js', location.href));
+  worker=new Worker(new URL('python-worker.js?v=engine-314-2', location.href), {type:'module', name:'cipherlab-python-314'});
  }
  catch(e){throw new Error('تعذّر بدء محرّك Python: '+e.message);}
  worker.onmessage=e=>{
